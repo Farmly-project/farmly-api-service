@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/Farmly-project/farmly-web-client#readme",
   "dependencies": {
-    "@supabase/supabase-js": "^2.119.0",
+    "@supabase/supabase-js": "^2.119.2",
     "cors": "^2.8.6",
     "dotenv": "^18.0.10",
     "express": "^5.3.0"
