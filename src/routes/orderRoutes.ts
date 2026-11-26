@@ -10,10 +10,12 @@ import {
   getOrdersQuerySchema,
   updateOrderStatusSchema,
 } from "../validators/orderValidator";
-
+import { ComplaintController } from "../controllers/complaintController";
+import { uploadComplaintEvidence } from "../middlewares/uploadMiddleware";
+import { createComplaintSchema } from "../validators/complaintValidator";
 const router = Router();
 const orderController = new OrderController();
-
+const complaintController = new ComplaintController();
 // Public / Customer: Tính phí ship động theo km từ nông trại
 router.post(
   "/calculate-shipping",
@@ -80,6 +82,15 @@ router.patch(
   requireRole(USER_ROLES.CUSTOMER, USER_ROLES.SALES),
   validate(cancelOrderSchema),
   orderController.cancelOrder,
+);
+
+router.post(
+  "/:orderItemId/complaints",
+  verifyJWT,
+  requireRole(USER_ROLES.CUSTOMER),
+  uploadComplaintEvidence,
+  validate(createComplaintSchema),
+  complaintController.createComplaint,
 );
 
 export default router;

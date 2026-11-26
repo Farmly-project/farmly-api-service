@@ -10,6 +10,8 @@ import cartRoutes from "./cartRoutes";
 import orderRoutes from "./orderRoutes";
 import paymentRoutes from "./paymentRoutes";
 import subscriptionRoutes from "./subscriptionRoutes";
+import reviewRoutes from "./reviewRoutes";
+import complaintRoutes from "./complaintRoutes";
 
 const router = Router();
 
@@ -42,5 +44,9 @@ router.use("/payments", paymentRoutes);
 
 // Phân hệ 6
 router.use("/subscriptions", subscriptionRoutes);
+
+// Phân hệ 7
+router.use("/complaints", complaintRoutes);
+router.use("/reviews", reviewRoutes);
 
 export default router;
