@@ -3,6 +3,9 @@ import authRoutes from "./authRoutes";
 import profileRoutes from "./profileRoutes";
 import categoryRoutes from "./categoryRoutes";
 import productRoutes from "./productRoutes";
+import batchRoutes from "./batchRoutes";
+import traceRoutes from "./traceRoutes";
+import disposalRoutes from "./disposalRoutes";
 
 const router = Router();
 
@@ -20,5 +23,10 @@ router.use("/profile", profileRoutes);
 // Phân hệ 2
 router.use("/categories", categoryRoutes);
 router.use("/products", productRoutes);
+
+// Phân hệ 3
+router.use("/batches", batchRoutes);
+router.use("/trace", traceRoutes);
+router.use("/inventory-disposals", disposalRoutes);
 
 export default router;
