@@ -9,6 +9,7 @@ import disposalRoutes from "./disposalRoutes";
 import cartRoutes from "./cartRoutes";
 import orderRoutes from "./orderRoutes";
 import paymentRoutes from "./paymentRoutes";
+import subscriptionRoutes from "./subscriptionRoutes";
 
 const router = Router();
 
@@ -38,5 +39,8 @@ router.use("/orders", orderRoutes);
 
 // Phân hệ 5
 router.use("/payments", paymentRoutes);
+
+// Phân hệ 6
+router.use("/subscriptions", subscriptionRoutes);
 
 export default router;
