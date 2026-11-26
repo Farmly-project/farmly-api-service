@@ -1,36 +1,63 @@
-import express, { Request, Response, NextFunction } from "express";
-import cors from "cors";
 import dotenv from "dotenv";
-import { supabaseAdmin } from "./config/supabaseClient";
-import { globalErrorHandler } from "./middlewares/errorHandler";
-
 dotenv.config();
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+import app from "./app";
 
-app.get(
-  "/api/health",
-  async (_req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { data, error } = await supabaseAdmin.from("settings").select("*");
-      if (error) throw error;
+// Kiểm tra các biến môi trường cốt lõi trước khi khởi chạy server
+const requiredEnvVars = [
+  "SUPABASE_URL",
+  "SUPABASE_ANON_KEY",
+  "SUPABASE_SERVICE_ROLE_KEY",
+];
+const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
 
-      res.json({
-        status: "success",
-        message: "Farmly TypeScript Backend & Supabase connected!",
-        settings: data,
-      });
-    } catch (err) {
-      next(err);
-    }
-  },
-);
-
-app.use(globalErrorHandler);
+if (missingEnvVars.length > 0) {
+  console.error(
+    `[FATAL ERROR] Thiếu biến môi trường bắt buộc trong file .env: ${missingEnvVars.join(", ")}`,
+  );
+  process.exit(1);
+}
 
 const PORT = Number(process.env.PORT) || 5000;
-app.listen(PORT, () => {
-  console.log(`Server Farmly (TS) đang chạy tại http://localhost:${PORT}`);
+
+const server = app.listen(PORT, () => {
+  console.log("======================================================");
+  console.log(
+    ` Farmly Backend API đang chạy ở chế độ: ${process.env.NODE_ENV || "development"}`,
+  );
+  console.log(` Server lắng nghe tại: http://localhost:${PORT}/api/v1`);
+  console.log("======================================================");
+
+  // Khởi chạy các Cronjobs định kỳ (00:00 sinh đơn gói, 06:00 cảnh báo cận hạn...)
+  // initCronJobs();
+});
+
+// Bắt các lỗi Promise không được catch (Unhandled Rejection)
+process.on("unhandledRejection", (err: Error) => {
+  console.error(
+    "[UNHANDLED REJECTION] Đang tắt server an toàn...",
+    err.name,
+    err.message,
+  );
+  server.close(() => {
+    process.exit(1);
+  });
+});
+
+// Bắt các ngoại lệ không được xử lý (Uncaught Exception)
+process.on("uncaughtException", (err: Error) => {
+  console.error(
+    "[UNCAUGHT EXCEPTION] Đang tắt server ngay lập tức...",
+    err.name,
+    err.message,
+  );
+  process.exit(1);
+});
+
+// Xử lý tín hiệu dừng từ hệ điều hành / Docker / Render (SIGTERM)
+process.on("SIGTERM", () => {
+  console.log("[SIGTERM] Nhận tín hiệu dừng, đang đóng các kết nối HTTP...");
+  server.close(() => {
+    console.log("Server đã dừng hoàn toàn.");
+  });
 });

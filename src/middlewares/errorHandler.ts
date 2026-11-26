@@ -1,24 +1,25 @@
 import { Request, Response, NextFunction } from "express";
-
-export class AppError extends Error {
-  public readonly statusCode: number;
-
-  constructor(message: string, statusCode = 400) {
-    super(message);
-    this.statusCode = statusCode;
-    Object.setPrototypeOf(this, AppError.prototype);
-  }
-}
+import { AppError } from "../utils/appError";
 
 export const globalErrorHandler = (
   err: Error | AppError,
   _req: Request,
   res: Response,
   _next: NextFunction,
-): void => {
+) => {
   const statusCode = err instanceof AppError ? err.statusCode : 500;
+  const message =
+    err instanceof AppError
+      ? err.message
+      : "Đã xảy ra lỗi hệ thống nội bộ (Internal Server Error)";
+
+  if (process.env.NODE_ENV !== "production") {
+    console.error("[ERROR]:", err);
+  }
+
   res.status(statusCode).json({
     status: "error",
-    message: err.message || "Lỗi hệ thống máy chủ nội bộ",
+    message,
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
   });
 };
