@@ -10,10 +10,11 @@ import {
   updateProductSchema,
   uploadCertificationSchema,
 } from "../validators/productValidator";
-
+import { ReviewController } from "../controllers/reviewController";
+import { getProductReviewsSchema } from "../validators/complaintValidator";
 const router = Router();
 const productController = new ProductController();
-
+const reviewController = new ReviewController();
 // Public Routes (UC07: Xem & tìm kiếm sản phẩm)
 router.get("/", validate(getProductsQuerySchema), productController.getAll);
 router.get("/:id", productController.getById);
@@ -51,5 +52,9 @@ router.post(
   validate(uploadCertificationSchema),
   productController.uploadCertification,
 );
-
+router.get(
+  "/:productId/reviews",
+  validate(getProductReviewsSchema),
+  reviewController.getProductReviews,
+);
 export default router;
