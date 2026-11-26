@@ -12,6 +12,10 @@ import paymentRoutes from "./paymentRoutes";
 import subscriptionRoutes from "./subscriptionRoutes";
 import reviewRoutes from "./reviewRoutes";
 import complaintRoutes from "./complaintRoutes";
+import dashboardRoutes from "./dashboardRoutes";
+import notificationRoutes from "./notificationRoutes";
+import accountRoutes from "./accountRoutes";
+import settingsRoutes from "./settingsRoutes";
 
 const router = Router();
 
@@ -48,5 +52,11 @@ router.use("/subscriptions", subscriptionRoutes);
 // Phân hệ 7
 router.use("/complaints", complaintRoutes);
 router.use("/reviews", reviewRoutes);
+
+// Phân hệ 8: Quản trị, Thống kê & Hệ thống
+router.use("/dashboard", dashboardRoutes);
+router.use("/notifications", notificationRoutes);
+router.use("/accounts", accountRoutes);
+router.use("/settings", settingsRoutes);
 
 export default router;
