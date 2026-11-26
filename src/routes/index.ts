@@ -8,6 +8,7 @@ import traceRoutes from "./traceRoutes";
 import disposalRoutes from "./disposalRoutes";
 import cartRoutes from "./cartRoutes";
 import orderRoutes from "./orderRoutes";
+import paymentRoutes from "./paymentRoutes";
 
 const router = Router();
 
@@ -34,5 +35,8 @@ router.use("/inventory-disposals", disposalRoutes);
 // Phân hệ 4
 router.use("/cart", cartRoutes);
 router.use("/orders", orderRoutes);
+
+// Phân hệ 5
+router.use("/payments", paymentRoutes);
 
 export default router;
