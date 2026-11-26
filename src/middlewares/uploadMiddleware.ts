@@ -4,7 +4,7 @@ import { AppError } from "../utils/appError";
 
 const storage = multer.memoryStorage();
 
-// Bộ lọc cho file chứng nhận chất lượng (Ảnh JPG/PNG/WEBP hoặc PDF <= 5MB)
+// 1. File chứng nhận chất lượng (JPG/PNG/WEBP/PDF <= 5MB)
 const certFileFilter = (
   _req: Request,
   file: Express.Multer.File,
@@ -31,12 +31,35 @@ const certFileFilter = (
 export const uploadCertificationFile = multer({
   storage,
   fileFilter: certFileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB (NFR-P04)
-  },
+  limits: { fileSize: 5 * 1024 * 1024 },
 }).single("file");
 
-// Bộ lọc dùng chung cho ảnh/video khiếu nại hoặc nhật ký (tối đa 5 file, <= 50MB)
+// 2. Ảnh minh chứng xuất hủy (JPG/PNG/WEBP <= 5MB)
+const imageOnlyFilter = (
+  _req: Request,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback,
+) => {
+  const allowedMimes = ["image/jpeg", "image/png", "image/webp"];
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(
+      new AppError(
+        "Chỉ chấp nhận hình ảnh định dạng JPG, PNG hoặc WEBP (<= 5MB)",
+        400,
+      ),
+    );
+  }
+};
+
+export const uploadSingleImage = multer({
+  storage,
+  fileFilter: imageOnlyFilter,
+  limits: { fileSize: 5 * 1024 * 1024 },
+}).single("file");
+
+// 3. Ảnh/Video nhật ký canh tác & khiếu nại (JPG/PNG/WEBP/MP4/MOV <= 50MB)
 const mediaFileFilter = (
   _req: Request,
   file: Express.Multer.File,
@@ -61,11 +84,14 @@ const mediaFileFilter = (
   }
 };
 
+export const uploadSingleMedia = multer({
+  storage,
+  fileFilter: mediaFileFilter,
+  limits: { fileSize: 50 * 1024 * 1024 },
+}).single("file");
+
 export const uploadMediaFiles = multer({
   storage,
   fileFilter: mediaFileFilter,
-  limits: {
-    fileSize: 50 * 1024 * 1024, // 50 MB
-    files: 5,
-  },
+  limits: { fileSize: 50 * 1024 * 1024, files: 5 },
 }).array("files", 5);
