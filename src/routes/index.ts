@@ -6,6 +6,8 @@ import productRoutes from "./productRoutes";
 import batchRoutes from "./batchRoutes";
 import traceRoutes from "./traceRoutes";
 import disposalRoutes from "./disposalRoutes";
+import cartRoutes from "./cartRoutes";
+import orderRoutes from "./orderRoutes";
 
 const router = Router();
 
@@ -28,5 +30,9 @@ router.use("/products", productRoutes);
 router.use("/batches", batchRoutes);
 router.use("/trace", traceRoutes);
 router.use("/inventory-disposals", disposalRoutes);
+
+// Phân hệ 4
+router.use("/cart", cartRoutes);
+router.use("/orders", orderRoutes);
 
 export default router;
