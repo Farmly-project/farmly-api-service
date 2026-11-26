@@ -84,3 +84,46 @@ export const requireRole = (...allowedRoles: UserRole[]) => {
     next();
   };
 };
+export const optionalVerifyJWT = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return next(); // Không có token -> Tiếp tục với tư cách Guest
+    }
+
+    const token = authHeader.split(" ")[1];
+    if (!token) {
+      return next();
+    }
+
+    const {
+      data: { user },
+      error,
+    } = await supabaseAdmin.auth.getUser(token);
+
+    if (!error && user) {
+      const { data: profile } = await supabaseAdmin
+        .from("profiles")
+        .select("role, deleted_at")
+        .eq("id", user.id)
+        .single();
+
+      if (profile && !profile.deleted_at) {
+        req.user = {
+          id: user.id,
+          email: user.email!,
+          role: profile.role as UserRole,
+        };
+        req.accessToken = token;
+      }
+    }
+
+    next();
+  } catch {
+    next();
+  }
+};
