@@ -17,7 +17,7 @@ router.get("/", farmingLogController.getTimeline);
 router.post(
   "/",
   verifyJWT,
-  requireRole(USER_ROLES.FARM_STAFF),
+  requireRole(USER_ROLES.FARM_STAFF, USER_ROLES.ADMIN),
   uploadSingleMedia,
   validate(createFarmingLogSchema),
   farmingLogController.createLog,
