@@ -45,7 +45,7 @@ router.get(
 router.post(
   "/",
   verifyJWT,
-  requireRole(USER_ROLES.FARM_STAFF),
+  requireRole(USER_ROLES.FARM_STAFF, USER_ROLES.ADMIN),
   validate(createBatchSchema),
   batchController.create,
 );
@@ -54,7 +54,7 @@ router.post(
 router.patch(
   "/:id/flash-sale",
   verifyJWT,
-  requireRole(USER_ROLES.SALES),
+  requireRole(USER_ROLES.SALES, USER_ROLES.ADMIN),
   validate(flashSaleBatchSchema),
   batchController.setFlashSale,
 );
@@ -63,7 +63,7 @@ router.patch(
 router.post(
   "/:batchId/qr-code",
   verifyJWT,
-  requireRole(USER_ROLES.FARM_STAFF),
+  requireRole(USER_ROLES.FARM_STAFF, USER_ROLES.ADMIN),
   farmingLogController.generateQr,
 );
 

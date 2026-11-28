@@ -62,7 +62,7 @@ router.get(
 router.post(
   "/:id/confirm",
   verifyJWT,
-  requireRole(USER_ROLES.SALES),
+  requireRole(USER_ROLES.SALES, USER_ROLES.ADMIN),
   orderController.confirmOrder,
 );
 
@@ -79,7 +79,7 @@ router.patch(
 router.patch(
   "/:id/cancel",
   verifyJWT,
-  requireRole(USER_ROLES.CUSTOMER, USER_ROLES.SALES),
+  requireRole(USER_ROLES.CUSTOMER, USER_ROLES.SALES, USER_ROLES.ADMIN),
   validate(cancelOrderSchema),
   orderController.cancelOrder,
 );

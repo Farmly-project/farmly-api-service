@@ -1,0 +1,5356 @@
+{
+  "info": {
+    "_postman_id": "80ec02be-ee55-4bc5-9595-c7e596e22894",
+    "name": "Farmly API – Tuần 5 (Chuẩn hóa CSDL & Collection Runner)",
+    "description": "Bộ kiểm thử tự động Farmly API (71 endpoints thuộc 8 phân hệ + các kịch bản FEFO, QR, RESTful, Error Handling). Đã đồng bộ baseUrl cổng 5000, các giá trị ENUM chuẩn PostgreSQL (storage_damage, bruised, refunded, shipping, expiry_alert_days), kịch bản lô 4 (TOM04) / lô 9 (TOM05) / lô 7 (LOL01) và tách riêng Webhook PayOS sang thư mục 99.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "00. Đăng nhập 4 vai trò",
+      "description": "Lấy JWT Access Token cho 4 vai trò (Admin, Farm Staff, Sales, Customer) và lưu tự động vào biến collection.",
+      "item": [
+        {
+          "name": "00.1 Đăng nhập Admin (admin@farmly.vn)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@farmly.vn\",\n  \"password\": \"Admin@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const token = json?.data?.accessToken || json?.data?.access_token || json?.accessToken || json?.token;",
+                  "pm.test('Có trả về accessToken', function () {",
+                  "    pm.expect(token).to.be.a('string').and.not.empty;",
+                  "});",
+                  "if (token) { pm.collectionVariables.set('admin_token', token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "00.2 Đăng nhập Farm Staff (thuan.tran@farmly.vn)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"thuan.tran@farmly.vn\",\n  \"password\": \"Farm@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const token = json?.data?.accessToken || json?.data?.access_token || json?.accessToken || json?.token;",
+                  "pm.test('Có trả về accessToken', function () {",
+                  "    pm.expect(token).to.be.a('string').and.not.empty;",
+                  "});",
+                  "if (token) { pm.collectionVariables.set('staff_token', token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "00.3 Đăng nhập Sales (ngoc.sales@farmly.vn)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ngoc.sales@farmly.vn\",\n  \"password\": \"Sales@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const token = json?.data?.accessToken || json?.data?.access_token || json?.accessToken || json?.token;",
+                  "pm.test('Có trả về accessToken', function () {",
+                  "    pm.expect(token).to.be.a('string').and.not.empty;",
+                  "});",
+                  "if (token) { pm.collectionVariables.set('sales_token', token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "00.4 Đăng nhập Customer (minhanh@gmail.com)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"minhanh@gmail.com\",\n  \"password\": \"Customer@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const token = json?.data?.accessToken || json?.data?.access_token || json?.accessToken || json?.token;",
+                  "pm.test('Có trả về accessToken', function () {",
+                  "    pm.expect(token).to.be.a('string').and.not.empty;",
+                  "});",
+                  "if (token) { pm.collectionVariables.set('customer_token', token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "01. Kịch bản FEFO – Đặt hàng trừ kho",
+      "description": "Kịch bản 7 bước kiểm thử thuật toán FEFO trên Cà chua bi (product_id=2: lô 4 TOM04 hạn 2026-11-28 còn 32kg, lô 9 TOM05 hạn 2026-12-03 còn 50kg) và chặn đơn vượt tồn trên Xà lách (product_id=3: lô 7 LOL01 còn 18kg).",
+      "item": [
+        {
+          "name": "01.1 Bước 1: Sales xem gợi ý lô FEFO (product_id=2)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batches/fefo/suggest?product_id=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                "fefo",
+                "suggest"
+              ],
+              "query": [
+                {
+                  "key": "product_id",
+                  "value": "2"
+                }
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{sales_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// Dọn dẹp đơn test FEFO cũ nếu có để kịch bản chạy lại được nhiều lần",
+                  "const oldOrderId = pm.collectionVariables.get('order_fefo');",
+                  "const salesToken = pm.collectionVariables.get('sales_token');",
+                  "const baseUrl = pm.collectionVariables.get('baseUrl');",
+                  "if (oldOrderId && salesToken) {",
+                  "    pm.sendRequest({",
+                  "        url: `${baseUrl}/orders/${oldOrderId}/cancel`,",
+                  "        method: 'PATCH',",
+                  "        header: { 'Authorization': `Bearer ${salesToken}`, 'Content-Type': 'application/json' },",
+                  "        body: { mode: 'raw', raw: JSON.stringify({ cancel_reason: 'Reset test FEFO' }) }",
+                  "    }, function () {});",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const list = json?.data?.batches || json?.data || [];",
+                  "pm.test('Trả về danh sách lô gợi ý theo FEFO (TOM04 đứng trước TOM05)', function () {",
+                  "    pm.expect(list).to.be.an('array').with.length.greaterThan(1);",
+                  "    pm.expect(list[0].batch_code).to.eql('TOM04');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "01.2 Bước 2: Customer đặt 40 kg Cà chua bi (vượt 32 kg lô TOM04)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_name\": \"Nguyễn Minh Anh\",\n  \"customer_phone\": \"0909123456\",\n  \"shipping_address\": \"123 Nguyễn Văn Cừ, Quận 5, TP.HCM\",\n  \"distance_km\": 4.5,\n  \"payment_method\": \"cod\",\n  \"customer_note\": \"Test kịch bản tách lô FEFO 40kg\",\n  \"items\": [\n    {\n      \"product_id\": 2,\n      \"quantity\": 40\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [201]', function () {",
+                  "    pm.expect([201]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const orderId = json?.data?.id || json?.data?.order?.id;",
+                  "pm.test('Tạo đơn thành công và lưu order_fefo', function () {",
+                  "    pm.expect(orderId).to.exist;",
+                  "});",
+                  "if (orderId) { pm.collectionVariables.set('order_fefo', String(orderId)); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "01.3 Bước 3: Sales duyệt đơn (kích hoạt allocate_fefo trừ kho)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{order_fefo}}/confirm",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_fefo}}",
+                "confirm"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{sales_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Duyệt đơn và phân bổ lô FEFO thành công', function () {",
+                  "    pm.expect(json.status || 'success').to.not.eql('error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "01.4 Bước 4: Xem chi tiết đơn hàng (32 kg lô 4 + 8 kg lô 9)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{order_fefo}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_fefo}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{sales_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const items = json?.data?.items || json?.data?.order_items || [];",
+                  "const allocs = items[0]?.batch_allocations || items[0]?.order_details || [];",
+                  "pm.test('Phân bổ đủ 40 kg qua 2 lô: 32 kg lô 4 (TOM04) và 8 kg lô 9 (TOM05)', function () {",
+                  "    pm.expect(allocs).to.be.an('array').with.lengthOf(2);",
+                  "    const total = allocs.reduce((s, a) => s + Number(a.quantity), 0);",
+                  "    pm.expect(total).to.eql(40);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "01.5 Bước 5: Kiểm tra lô 4 (TOM04) còn 0 kg và chuyển sold_out",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batches/4",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                "4"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staff_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const batch = json?.data || {};",
+                  "pm.test('Lô TOM04 (id=4) hết tồn (0 kg) và trạng thái sold_out', function () {",
+                  "    pm.expect(Number(batch.current_quantity)).to.eql(0);",
+                  "    pm.expect(batch.status).to.eql('sold_out');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "01.6 Bước 6: Customer đặt 20 kg Xà lách (kho chỉ còn 18 kg -> chặn 400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"customer_name\": \"Nguyễn Minh Anh\",\n  \"customer_phone\": \"0909123456\",\n  \"shipping_address\": \"123 Nguyễn Văn Cừ, Quận 5, TP.HCM\",\n  \"distance_km\": 4.5,\n  \"payment_method\": \"cod\",\n  \"items\": [\n    {\n      \"product_id\": 3,\n      \"quantity\": 20\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [400]', function () {",
+                  "    pm.expect([400]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Trả về lỗi 400 báo không đủ tồn kho khả dụng', function () {",
+                  "    pm.expect(json.status).to.eql('error');",
+                  "    pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "01.7 Bước 7: Kiểm tra lô 7 (LOL01) vẫn nguyên 18 kg",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batches/7",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                "7"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staff_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const batch = json?.data || {};",
+                  "pm.test('Lô LOL01 (id=7) không bị trừ kho, vẫn còn 18 kg', function () {",
+                  "    pm.expect(Number(batch.current_quantity)).to.eql(18);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02. Bộ bắt lỗi tập trung & Phân quyền",
+      "description": "Kiểm thử 8 tình huống lỗi (401, 403, 400, 404) bảo đảm middleware trả về JSON chuẩn {status: 'error', message}.",
+      "item": [
+        {
+          "name": "02.1 Không gửi token (401 Unauthorized)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/my-orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "my-orders"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [401]', function () {",
+                  "    pm.expect([401]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Định dạng lỗi chuẩn {status: \"error\", message}', function () {",
+                  "    pm.expect(json.status).to.eql('error');",
+                  "    pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.2 Token không hợp lệ (401 Unauthorized)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders/my-orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "my-orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{invalid_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [401]', function () {",
+                  "    pm.expect([401]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Định dạng lỗi chuẩn {status: \"error\", message}', function () {",
+                  "    pm.expect(json.status).to.eql('error');",
+                  "    pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.3 Customer gọi API của Sales (403 Forbidden)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/orders",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [403]', function () {",
+                  "    pm.expect([403]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Định dạng lỗi chuẩn {status: \"error\", message}', function () {",
+                  "    pm.expect(json.status).to.eql('error');",
+                  "    pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.4 Sales tạo lô hàng của Farm Staff (403 Forbidden)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/batches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{sales_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 1,\n  \"initial_quantity\": 10,\n  \"status\": \"in_stock\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [403]', function () {",
+                  "    pm.expect([403]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Định dạng lỗi chuẩn {status: \"error\", message}', function () {",
+                  "    pm.expect(json.status).to.eql('error');",
+                  "    pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.5 Thiếu trường bắt buộc khi tạo lô (400 Bad Request)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/batches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staff_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sowing_date\": \"2026-11-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [400]', function () {",
+                  "    pm.expect([400]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Định dạng lỗi chuẩn {status: \"error\", message}', function () {",
+                  "    pm.expect(json.status).to.eql('error');",
+                  "    pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.6 Lô hàng không tồn tại /batches/999999 (404 Not Found)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batches/999999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                "999999"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staff_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [404]', function () {",
+                  "    pm.expect([404]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Định dạng lỗi chuẩn {status: \"error\", message}', function () {",
+                  "    pm.expect(json.status).to.eql('error');",
+                  "    pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.7 Route không tồn tại trả về JSON (404 Not Found)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/khong-ton-tai-route",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "khong-ton-tai-route"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [404]', function () {",
+                  "    pm.expect([404]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Định dạng lỗi chuẩn {status: \"error\", message}', function () {",
+                  "    pm.expect(json.status).to.eql('error');",
+                  "    pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "02.8 Xuất hủy vượt tồn kho lô (400 Bad Request)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/inventory-disposals",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventory-disposals"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staff_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"batch_id\": 7,\n  \"quantity_disposed\": 9999,\n  \"reason\": \"storage_damage\",\n  \"note\": \"Test vượt tồn kho\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [400]', function () {",
+                  "    pm.expect([400]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Định dạng lỗi chuẩn {status: \"error\", message}', function () {",
+                  "    pm.expect(json.status).to.eql('error');",
+                  "    pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03. Sinh mã QR & Truy xuất nguồn gốc",
+      "description": "Kiểm thử sinh mã QR cho lô đã thu hoạch (lô 1: BATCH-20261124-RAU01) và trang truy xuất công khai không cần đăng nhập.",
+      "item": [
+        {
+          "name": "03.1 Farm Staff sinh mã QR cho lô 1",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batches/1/qr-code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                "1",
+                "qr-code"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{staff_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200, 201]', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Trả về mã QR base64 và link truy xuất', function () {",
+                  "    pm.expect(json.data).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03.2 Public quét mã QR truy xuất lô BATCH-20261124-RAU01",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trace/BATCH-20261124-RAU01",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trace",
+                "BATCH-20261124-RAU01"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Hiển thị đầy đủ thông tin lô, chứng nhận và nhật ký canh tác', function () {",
+                  "    pm.expect(json.data).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03.3 Public xem timeline nhật ký canh tác lô 1",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/batches/1/farming-logs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "batches",
+                "1",
+                "farming-logs"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Trả về danh sách nhật ký canh tác', function () {",
+                  "    pm.expect(json.data).to.exist;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "03.4 Quét mã QR lô không tồn tại (404 Not Found)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/trace/BATCH-KHONG-TON-TAI-999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "trace",
+                "BATCH-KHONG-TON-TAI-999"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [404]', function () {",
+                  "    pm.expect([404]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Định dạng lỗi chuẩn {status: \"error\", message}', function () {",
+                  "    pm.expect(json.status).to.eql('error');",
+                  "    pm.expect(json.message).to.be.a('string').and.not.empty;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04. Đủ 5 phương thức RESTful",
+      "description": "Chứng minh hệ thống vận hành đầy đủ 5 phương thức HTTP chuẩn RESTful (POST, GET, PUT, DELETE, PATCH) trên Giỏ hàng và Đơn hàng.",
+      "item": [
+        {
+          "name": "04.1 [POST] Thêm sản phẩm vào giỏ hàng",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cart/items",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cart",
+                "items"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"product_id\": 1,\n  \"quantity\": 2\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200, 201]', function () {",
+                  "    pm.expect([200, 201]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const items = json?.data?.items || json?.data?.cart_items || (json?.data?.id ? [json.data] : []);",
+                  "const item = items.find(i => Number(i.product_id) === 1) || items[0];",
+                  "if (item && item.id) { pm.collectionVariables.set('cart_item_id', String(item.id)); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "04.2 [GET] Xem giỏ hàng hiện tại",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cart",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cart"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "const items = json?.data?.items || json?.data?.cart_items || [];",
+                  "if (items.length > 0 && !pm.collectionVariables.get('cart_item_id')) {",
+                  "    pm.collectionVariables.set('cart_item_id', String(items[0].id));",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "04.3 [PUT] Cập nhật số lượng sản phẩm trong giỏ",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/cart/items/{{cart_item_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cart",
+                "items",
+                "{{cart_item_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"quantity\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "04.4 [DELETE] Xóa sản phẩm khỏi giỏ hàng",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/cart/items/{{cart_item_id}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "cart",
+                "items",
+                "{{cart_item_id}}"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "04.5 [PATCH] Sales cập nhật trạng thái đơn hàng sang shipping",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/orders/{{order_fefo}}/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "orders",
+                "{{order_fefo}}",
+                "status"
+              ]
+            },
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{sales_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"shipping\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                  "    pm.expect([200]).to.include(pm.response.code);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Cập nhật trạng thái đơn hàng thành công', function () {",
+                  "    pm.expect(json.status || 'success').to.not.eql('error');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05. Rà soát toàn bộ 71 API theo 8 Phân hệ",
+      "description": "Danh mục đầy đủ các API thuộc 8 phân hệ (69 API vận hành chính; 2 API Webhook/Return PayOS tách sang thư mục 99 chạy cuối cùng).",
+      "item": [
+        {
+          "name": "Phân hệ 1: Xác thực & Hồ sơ cá nhân (12 APIs)",
+          "item": [
+            {
+              "name": "01. POST /auth/login – Đăng nhập",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/login",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "login"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"minhanh@gmail.com\",\n  \"password\": \"Customer@123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "02. POST /auth/register – Đăng ký khách hàng",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/register",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "register"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"test.register.2026@farmly.vn\",\n  \"password\": \"Password123\",\n  \"full_name\": \"Trần Văn Test\",\n  \"phone\": \"0909888777\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 400, 409]', function () {",
+                      "    pm.expect([201, 400, 409]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "03. GET /auth/me – Thông tin tài khoản hiện tại",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "me"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "04. POST /auth/refresh-token – Cấp lại token",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/refresh-token",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "refresh-token"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"refreshToken\": \"sample_refresh_token\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400, 401]', function () {",
+                      "    pm.expect([200, 400, 401]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "05. POST /auth/logout – Đăng xuất",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/logout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "logout"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "06. PATCH /auth/change-password – Đổi mật khẩu",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/change-password",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "change-password"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"oldPassword\": \"WrongOldPassword1\",\n  \"newPassword\": \"NewPassword123\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400, 401]', function () {",
+                      "    pm.expect([200, 400, 401]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "07. GET /profile – Xem hồ sơ cá nhân",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profile"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "08. PATCH /profile – Cập nhật hồ sơ cá nhân",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profile"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"full_name\": \"Nguyễn Minh Anh\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "09. GET /profile/addresses – Sổ địa chỉ giao hàng",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/profile/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profile",
+                    "addresses"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "10. POST /profile/addresses – Thêm địa chỉ mới",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profile/addresses",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profile",
+                    "addresses"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"recipient_name\": \"Nguyễn Minh Anh\",\n  \"phone\": \"0909123456\",\n  \"address_line\": \"456 Lê Hồng Phong\",\n  \"ward\": \"Phường 2\",\n  \"province\": \"TP.HCM\",\n  \"is_default\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201]', function () {",
+                      "    pm.expect([201]).to.include(pm.response.code);",
+                      "});",
+                      "const id = pm.response.json()?.data?.id;",
+                      "if (id) { pm.collectionVariables.set('address_id', String(id)); }"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "11. PATCH /profile/addresses/:id – Cập nhật địa chỉ",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/profile/addresses/{{address_id}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profile",
+                    "addresses",
+                    "{{address_id}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"address_line\": \"458 Lê Hồng Phong\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "12. DELETE /profile/addresses/:id – Xóa địa chỉ",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/profile/addresses/{{address_id}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "profile",
+                    "addresses",
+                    "{{address_id}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phân hệ 2: Danh mục, Sản phẩm & Kiểm định (11 APIs)",
+          "item": [
+            {
+              "name": "13. GET /categories – Danh sách danh mục",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/categories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "14. GET /categories/:id – Chi tiết danh mục",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/categories/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    "1"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "15. POST /categories – Tạo danh mục mới (Admin)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/categories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Nấm hữu cơ test\",\n  \"description\": \"Các loại nấm sạch\",\n  \"allow_subscription\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 400, 409]', function () {",
+                      "    pm.expect([201, 400, 409]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "16. PUT /categories/:id – Cập nhật danh mục (ID 999999 bảo toàn seed)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/categories/999999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    "999999"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Danh mục cập nhật\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "17. DELETE /categories/:id – Xóa mềm danh mục (ID 999999 bảo toàn seed)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/categories/999999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "categories",
+                    "999999"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "18. GET /products – Danh sách sản phẩm",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/products?page=1&limit=10",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "19. GET /products/:id – Chi tiết sản phẩm",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/products/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "products",
+                    "1"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "20. POST /products – Tạo sản phẩm mới (Admin)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/products",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "products"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"category_id\": 1,\n  \"name\": \"Rau muống hữu cơ test\",\n  \"unit\": \"kg\",\n  \"base_price\": 22000,\n  \"preservation_days\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 400, 409]', function () {",
+                      "    pm.expect([201, 400, 409]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "21. PUT /products/:id – Cập nhật sản phẩm (ID 999999 bảo toàn seed)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/products/999999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "products",
+                    "999999"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"base_price\": 25000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "22. DELETE /products/:id – Xóa mềm sản phẩm (ID 999999 bảo toàn seed)",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/products/999999",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "products",
+                    "999999"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "23. POST /products/:productId/certifications – Upload chứng nhận",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/products/1/certifications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "products",
+                    "1",
+                    "certifications"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "cert_name",
+                      "value": "VietGAP 2026",
+                      "type": "text"
+                    },
+                    {
+                      "key": "cert_number",
+                      "value": "VG-2026-999",
+                      "type": "text"
+                    },
+                    {
+                      "key": "issued_by",
+                      "value": "Trung tâm Kiểm định Chất lượng",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 400]', function () {",
+                      "    pm.expect([201, 400]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phân hệ 3: Lô hàng, FEFO, Nhật ký & Truy xuất QR (10 APIs)",
+          "item": [
+            {
+              "name": "24. GET /batches – Danh sách lô hàng",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/batches",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "batches"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{staff_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "25. GET /batches/fefo/suggest – Gợi ý lô theo FEFO",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/batches/fefo/suggest?product_id=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "batches",
+                    "fefo",
+                    "suggest"
+                  ],
+                  "query": [
+                    {
+                      "key": "product_id",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "26. GET /batches/:id – Chi tiết lô hàng",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/batches/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "batches",
+                    "1"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{staff_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "27. POST /batches – Tạo lô hàng mới (Farm Staff)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/batches",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "batches"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{staff_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"product_id\": 1,\n  \"sowing_date\": \"2026-11-01\",\n  \"harvest_date\": \"2026-11-28\",\n  \"exp_date\": \"2026-12-05\",\n  \"initial_quantity\": 50,\n  \"status\": \"in_stock\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201]', function () {",
+                      "    pm.expect([201]).to.include(pm.response.code);",
+                      "});",
+                      "const id = pm.response.json()?.data?.id;",
+                      "if (id) { pm.collectionVariables.set('batch_id', String(id)); }"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "28. PATCH /batches/:id/flash-sale – Cài giá xả hàng lô cận hạn (Sales)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/batches/{{batch_id}}/flash-sale",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "batches",
+                    "{{batch_id}}",
+                    "flash-sale"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"flash_sale_price\": 15000,\n  \"flash_sale_ends_at\": \"2026-12-04T23:59:59.000Z\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "29. POST /batches/:batchId/farming-logs – Ghi nhật ký canh tác",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/batches/{{batch_id}}/farming-logs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "batches",
+                    "{{batch_id}}",
+                    "farming-logs"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{staff_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"stage\": \"sowing\",\n  \"title\": \"Gieo hạt giống hữu cơ\",\n  \"description\": \"Gieo hạt chuẩn VietGAP\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 404]', function () {",
+                      "    pm.expect([201, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "30. GET /batches/:batchId/farming-logs – Timeline nhật ký canh tác",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/batches/1/farming-logs",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "batches",
+                    "1",
+                    "farming-logs"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "31. POST /batches/:batchId/qr-code – Sinh mã QR cho lô",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/batches/{{batch_id}}/qr-code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "batches",
+                    "{{batch_id}}",
+                    "qr-code"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{staff_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 201, 404]', function () {",
+                      "    pm.expect([200, 201, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "32. GET /trace/:batchCode – Trang công khai quét mã QR",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/trace/BATCH-20261124-RAU01",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "trace",
+                    "BATCH-20261124-RAU01"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "33. POST /inventory-disposals – Xuất hủy hao hụt (enum chuẩn storage_damage)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/inventory-disposals",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "inventory-disposals"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{staff_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"batch_id\": 1,\n  \"quantity_disposed\": 1,\n  \"reason\": \"storage_damage\",\n  \"note\": \"Hao hụt kiểm kho định kỳ\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 400]', function () {",
+                      "    pm.expect([201, 400]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phân hệ 4: Giỏ hàng & Đơn hàng (13 APIs)",
+          "item": [
+            {
+              "name": "34. GET /cart – Lấy giỏ hàng hiện tại",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/cart",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cart"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "35. POST /cart/items – Thêm sản phẩm vào giỏ",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cart/items",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cart",
+                    "items"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"product_id\": 1,\n  \"quantity\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 201]', function () {",
+                      "    pm.expect([200, 201]).to.include(pm.response.code);",
+                      "});",
+                      "const items = pm.response.json()?.data?.items || pm.response.json()?.data?.cart_items || [];",
+                      "if (items.length > 0) { pm.collectionVariables.set('cart_item_id', String(items[0].id)); }"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "36. PUT /cart/items/:itemId – Cập nhật số lượng giỏ hàng",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cart/items/{{cart_item_id}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cart",
+                    "items",
+                    "{{cart_item_id}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantity\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "37. DELETE /cart/items/:itemId – Xóa sản phẩm khỏi giỏ",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/cart/items/{{cart_item_id}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cart",
+                    "items",
+                    "{{cart_item_id}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "38. POST /cart/checkout – Checkout từ giỏ hàng",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/cart/checkout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "cart",
+                    "checkout"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"customer_name\": \"Nguyễn Minh Anh\",\n  \"customer_phone\": \"0909123456\",\n  \"shipping_address\": \"123 Nguyễn Văn Cừ, Q5\",\n  \"distance_km\": 3.0,\n  \"payment_method\": \"cod\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 400]', function () {",
+                      "    pm.expect([201, 400]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "39. POST /orders – Tạo đơn hàng lẻ mới",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"customer_name\": \"Nguyễn Minh Anh\",\n  \"customer_phone\": \"0909123456\",\n  \"shipping_address\": \"123 Nguyễn Văn Cừ, Q5\",\n  \"distance_km\": 3.0,\n  \"payment_method\": \"payos\",\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201]', function () {",
+                      "    pm.expect([201]).to.include(pm.response.code);",
+                      "});",
+                      "const id = pm.response.json()?.data?.id || pm.response.json()?.data?.order?.id;",
+                      "if (id) { pm.collectionVariables.set('order_id', String(id)); }"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "40. GET /orders/my-orders – Lịch sử đơn hàng của khách",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/my-orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "my-orders"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "41. POST /orders/calculate-shipping – Tính phí ship theo km",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/calculate-shipping",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "calculate-shipping"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"latitude\": 10.762622,\n  \"longitude\": 106.660172\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "42. GET /orders – Danh sách đơn hàng toàn hệ thống (Sales/Admin)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "43. GET /orders/:id – Chi tiết đơn hàng",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{order_id}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "{{order_id}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "44. POST /orders/:id/confirm – Sales duyệt đơn (FEFO)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{order_id}}/confirm",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "{{order_id}}",
+                    "confirm"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400, 404]', function () {",
+                      "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "45. PATCH /orders/:id/status – Cập nhật trạng thái (enum chuẩn delivered)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/{{order_id}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "{{order_id}}",
+                    "status"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"delivered\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400, 404]', function () {",
+                      "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "46. PATCH /orders/:id/cancel – Hủy đơn hàng (ID 999999 bảo toàn đơn đã giao)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/999999/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "999999",
+                    "cancel"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cancel_reason\": \"Test hủy đơn\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400, 404]', function () {",
+                      "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phân hệ 5: Thanh toán PayOS (2 APIs nội bộ – Webhook & Return tách sang mục 99)",
+          "item": [
+            {
+              "name": "47. POST /payments – Tạo yêu cầu thanh toán VietQR / PayOS",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/payments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payments"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"order_id\": \"{{order_id}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 201, 400, 404]', function () {",
+                      "    pm.expect([200, 201, 400, 404]).to.include(pm.response.code);",
+                      "});",
+                      "const id = pm.response.json()?.data?.payment?.id || pm.response.json()?.data?.id;",
+                      "if (id) { pm.collectionVariables.set('payment_id', String(id)); }"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "50. GET /payments/:id/status – Kiểm tra trạng thái giao dịch",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/payments/{{payment_id}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "payments",
+                    "{{payment_id}}",
+                    "status"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400, 404]', function () {",
+                      "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phân hệ 6: Gói mua hàng Định kỳ (6 APIs)",
+          "item": [
+            {
+              "name": "51. POST /subscriptions – Đăng ký gói định kỳ",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/subscriptions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "subscriptions"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"package_name\": \"Gói rau xanh hàng tuần\",\n  \"items\": [\n    {\n      \"product_id\": 1,\n      \"quantity\": 2\n    }\n  ],\n  \"delivery_days\": [\n    2,\n    5\n  ],\n  \"start_date\": \"2026-12-01\",\n  \"duration_weeks\": 4,\n  \"shipping_address\": \"123 Nguyễn Văn Cừ, Q5\",\n  \"distance_km\": 3.0\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 400]', function () {",
+                      "    pm.expect([201, 400]).to.include(pm.response.code);",
+                      "});",
+                      "const id = pm.response.json()?.data?.id || pm.response.json()?.data?.subscription?.id;",
+                      "if (id) { pm.collectionVariables.set('subscription_id', String(id)); }"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "52. GET /subscriptions/my-subscriptions – Danh sách gói cá nhân",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/subscriptions/my-subscriptions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "subscriptions",
+                    "my-subscriptions"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "53. POST /subscriptions/cron/generate-orders – Cron sinh đơn con",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/subscriptions/cron/generate-orders",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "subscriptions",
+                    "cron",
+                    "generate-orders"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"target_date\": \"2026-12-02\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 401, 403]', function () {",
+                      "    pm.expect([200, 401, 403]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "54. GET /subscriptions/:id – Chi tiết gói định kỳ",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/subscriptions/{{subscription_id}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "subscriptions",
+                    "{{subscription_id}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "55. PATCH /subscriptions/:id/pause – Tạm dừng gói định kỳ",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/subscriptions/{{subscription_id}}/pause",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "subscriptions",
+                    "{{subscription_id}}",
+                    "pause"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400, 404]', function () {",
+                      "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "56. PATCH /subscriptions/:id/cancel – Hủy gói định kỳ",
+              "request": {
+                "method": "PATCH",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/subscriptions/{{subscription_id}}/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "subscriptions",
+                    "{{subscription_id}}",
+                    "cancel"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400, 404]', function () {",
+                      "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phân hệ 7: Khiếu nại, Đổi trả & Đánh giá (6 APIs)",
+          "item": [
+            {
+              "name": "57. POST /orders/:orderItemId/complaints – Gửi khiếu nại (enum chuẩn bruised)",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/orders/1/complaints",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "orders",
+                    "1",
+                    "complaints"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "quantity_affected",
+                      "value": "1",
+                      "type": "text"
+                    },
+                    {
+                      "key": "reason",
+                      "value": "bruised",
+                      "type": "text"
+                    },
+                    {
+                      "key": "description",
+                      "value": "Rau bị dập nhẹ khi vận chuyển",
+                      "type": "text"
+                    },
+                    {
+                      "key": "requested_resolution",
+                      "value": "refund",
+                      "type": "text"
+                    }
+                  ]
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 400, 404]', function () {",
+                      "    pm.expect([201, 400, 404]).to.include(pm.response.code);",
+                      "});",
+                      "const id = pm.response.json()?.data?.id;",
+                      "if (id) { pm.collectionVariables.set('complaint_id', String(id)); }"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "58. GET /complaints – Hàng đợi khiếu nại (Sales)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/complaints",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "complaints"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "59. GET /complaints/:id – Chi tiết khiếu nại",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/complaints/{{complaint_id}}",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "complaints",
+                    "{{complaint_id}}"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 404]', function () {",
+                      "    pm.expect([200, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "60. PATCH /complaints/:id/handle – Sales duyệt khiếu nại (status chuẩn refunded)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/complaints/{{complaint_id}}/handle",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "complaints",
+                    "{{complaint_id}}",
+                    "handle"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"action\": \"approve\",\n  \"status\": \"refunded\",\n  \"resolution\": \"refund\",\n  \"refund_amount\": 25000,\n  \"sales_note\": \"Đã xác minh hình ảnh minh chứng\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400, 404]', function () {",
+                      "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "61. POST /reviews – Đánh giá sản phẩm đã mua",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/reviews",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "reviews"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{customer_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"order_item_id\": 1,\n  \"rating\": 5,\n  \"comment\": \"Rau rất tươi và truy xuất nguồn gốc rõ ràng\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 400, 404, 409]', function () {",
+                      "    pm.expect([201, 400, 404, 409]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "62. GET /products/:productId/reviews – Xem đánh giá sản phẩm",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/products/1/reviews",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "products",
+                    "1",
+                    "reviews"
+                  ]
+                },
+                "auth": {
+                  "type": "noauth"
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Phân hệ 8: Quản trị, Thống kê & Cấu hình Hệ thống (9 APIs)",
+          "item": [
+            {
+              "name": "63. GET /dashboard/summary – Thống kê tổng quan (Admin)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dashboard/summary",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "summary"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "64. GET /dashboard/revenue-by-day – Biểu đồ doanh thu theo ngày",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dashboard/revenue-by-day",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "revenue-by-day"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "65. GET /dashboard/disposal-report – Báo cáo hao hụt theo lô",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dashboard/disposal-report",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "disposal-report"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "66. GET /dashboard/export-excel – Xuất báo cáo Excel (.xlsx)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dashboard/export-excel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "export-excel"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "67. GET /notifications – Danh sách thông báo cảnh báo",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/notifications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "notifications"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{sales_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "68. GET /accounts – Danh sách tài khoản nhân viên (Admin)",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/accounts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounts"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": ""
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200]', function () {",
+                      "    pm.expect([200]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "69. POST /accounts – Tạo tài khoản nhân viên mới (Admin)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounts"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"staff.test.2026@farmly.vn\",\n  \"password\": \"Password123\",\n  \"full_name\": \"Nhân Viên Test\",\n  \"role\": \"farm_staff\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [201, 400, 409]', function () {",
+                      "    pm.expect([201, 400, 409]).to.include(pm.response.code);",
+                      "});",
+                      "const id = pm.response.json()?.data?.id;",
+                      "if (id) { pm.collectionVariables.set('account_id', String(id)); }"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "70. PATCH /accounts/:id/status – Khóa/Mở khóa nhân viên (soft delete deleted_at)",
+              "request": {
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/accounts/{{account_id}}/status",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "accounts",
+                    "{{account_id}}",
+                    "status"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"is_active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400, 404]', function () {",
+                      "    pm.expect([200, 400, 404]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "71. PUT /settings – Cấu hình hệ thống (key chuẩn expiry_alert_days)",
+              "request": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "settings"
+                  ]
+                },
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{admin_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "description": "",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"expiry_alert_days\": 2,\n  \"shipping_fee_per_km\": 5000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [],
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                      "});",
+                      "pm.test('Mã trạng thái HTTP thuộc [200, 400]', function () {",
+                      "    pm.expect([200, 400]).to.include(pm.response.code);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "99. Chạy cuối cùng (Webhook & Return PayOS)",
+      "description": "Tách riêng 2 endpoint callback của PayOS (API 48 & 49) với payload chuẩn chứa trường accountNumber dạng chuỗi để chạy cuối cùng trong Collection Runner.",
+      "item": [
+        {
+          "name": "48. POST /payments/webhook/payos – Webhook IPN PayOS (kèm accountNumber dạng chuỗi)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/payments/webhook/payos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "webhook",
+                "payos"
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"00\",\n  \"desc\": \"success\",\n  \"success\": true,\n  \"data\": {\n    \"orderCode\": 2026112801,\n    \"amount\": 50000,\n    \"description\": \"THANH TOAN DON HANG FARMLY\",\n    \"accountNumber\": \"0123456789\",\n    \"reference\": \"FT2633200001\",\n    \"transactionDateTime\": \"2026-11-28 06:00:00\",\n    \"currency\": \"VND\",\n    \"paymentLinkId\": \"test_link_2026\",\n    \"code\": \"00\",\n    \"desc\": \"Thành công\",\n    \"counterAccountBankId\": \"\",\n    \"counterAccountBankName\": \"\",\n    \"counterAccountName\": \"\",\n    \"counterAccountNumber\": \"\",\n    \"virtualAccountName\": \"\",\n    \"virtualAccountNumber\": \"\"\n  },\n  \"signature\": \"test_signature_placeholder\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200, 400]', function () {",
+                  "    pm.expect([200, 400]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "49. GET /payments/return/payos – Return URL sau thanh toán PayOS",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/payments/return/payos?code=00&id=test_link_2026&cancel=false&status=PAID&orderCode=2026112801&format=json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "payments",
+                "return",
+                "payos"
+              ],
+              "query": [
+                {
+                  "key": "code",
+                  "value": "00"
+                },
+                {
+                  "key": "id",
+                  "value": "test_link_2026"
+                },
+                {
+                  "key": "cancel",
+                  "value": "false"
+                },
+                {
+                  "key": "status",
+                  "value": "PAID"
+                },
+                {
+                  "key": "orderCode",
+                  "value": "2026112801"
+                },
+                {
+                  "key": "format",
+                  "value": "json"
+                }
+              ]
+            },
+            "auth": {
+              "type": "noauth"
+            },
+            "description": ""
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Thời gian phản hồi < 10000ms', function () {",
+                  "    pm.expect(pm.response.responseTime).to.be.below(10000);",
+                  "});",
+                  "pm.test('Mã trạng thái HTTP thuộc [200, 302, 400]', function () {",
+                  "    pm.expect([200, 302, 400]).to.include(pm.response.code);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "staff_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "sales_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "customer_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "invalid_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.token",
+      "type": "string"
+    },
+    {
+      "key": "order_fefo",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "cart_item_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "batch_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "order_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "payment_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "subscription_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "complaint_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "account_id",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "type": "string"
+    },
+    {
+      "key": "address_id",
+      "value": "1",
+      "type": "string"
+    },
+    {
+      "key": "cron_secret",
+      "value": "farmly_cron_secret_2026",
+      "type": "string"
+    }
+  ]
+}

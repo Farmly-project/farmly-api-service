@@ -72,7 +72,8 @@ export const requireRole = (...allowedRoles: UserRole[]) => {
       return next(new AppError("Chưa xác thực người dùng", 401));
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    const normalizedAllowed = allowedRoles.map((r) => r.toLowerCase());
+    if (!normalizedAllowed.includes(req.user.role.toLowerCase())) {
       return next(
         new AppError(
           "Bạn không có quyền truy cập chức năng này (Forbidden)",

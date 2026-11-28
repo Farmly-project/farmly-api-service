@@ -1,25 +1,29 @@
 {
-  "name": "farmly-web-client",
+  "name": "farmly-api-service",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend RESTful API cho hệ thống thương mại điện tử nông sản sạch Farmly",
+  "main": "dist/server.js",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "typecheck": "tsc --noEmit",
     "start": "node dist/server.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Farmly-project/farmly-web-client.git"
+    "url": "git+https://github.com/Farmly-project/farmly-api-service.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/Farmly-project/farmly-web-client/issues"
+    "url": "https://github.com/Farmly-project/farmly-api-service/issues"
   },
-  "homepage": "https://github.com/Farmly-project/farmly-web-client#readme",
+  "homepage": "https://github.com/Farmly-project/farmly-api-service#readme",
   "dependencies": {
     "@payos/node": "^2.0.6",
     "@supabase/supabase-js": "^2.119.2",
@@ -27,6 +31,7 @@
     "dotenv": "^18.0.10",
     "exceljs": "^4.4.0",
     "express": "^5.3.0",
+    "express-rate-limit": "^8.7.5",
     "helmet": "^8.3.0",
     "morgan": "^1.12.1",
     "multer": "^2.5.0",
@@ -42,7 +47,6 @@
     "@types/morgan": "^1.9.10",
     "@types/multer": "^2.3.0",
     "@types/node": "^26.6.10",
-    "@types/node-cron": "^3.0.11",
     "@types/qrcode": "^1.5.6",
     "@types/swagger-ui-express": "^4.1.8",
     "@types/yamljs": "^0.2.34",
